@@ -1,8 +1,13 @@
+import java.util.ArrayList;
+
 public class BoardMaker {
-    static int[][] board;
-    static int size;
+    int[][] board;
+    int size;
+    ArrayList singleRowBoard;
     public BoardMaker(int size){
         board = new int[size][size];
+        singleRowBoard=new ArrayList();
+
         this.size=size;
         for(int i=0; i<9; i++){
             for(int j=0; j<9; j++){
@@ -24,16 +29,16 @@ public class BoardMaker {
 
     }
 
-    public static int[][] createBoard(int size){
+    public static BoardMaker createBoard(int size){
         BoardMaker maker=new BoardMaker(size);
-        return maker.getBoard();
+        return maker;
     }
 
 
 
-        // n - liczba pól do schowania
-    public static int[][] boardHider(int fieldsToHide, int[][] Board){
-    board=Board;
+    // n - liczba pól do schowania
+    public int[][] boardHider(int fieldsToHide){
+
         while(fieldsToHide>0){
             int x=randomInt(9)-1;
             int y=randomInt(9)-1;
