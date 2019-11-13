@@ -21,7 +21,7 @@ app.post('/room', (req, res) =>
   {
     return res.redirect('/')
   }
-  rooms[req.body.room] = { users: {} }
+  rooms[req.body.room] = { users: {}, is_game_played: false }
   res.redirect(req.body.room)
   // Send message that new room was created
   io.emit('room-created', req.body.room)
@@ -40,25 +40,41 @@ server.listen(3000)
 
 io.on('connection', socket => 
 {
-  socket.on('new-user', (room, name) => 
+  socket.on('new-user', (room, name, points) => 
   {
     socket.join(room)
-    rooms[room].users[socket.id] = name
+    rooms[room].users[socket.id] = {name, points}
     socket.to(room).broadcast.emit('user-connected', name)
   })
   socket.on('send-chat-message', (room, message) => 
   {
-    socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id] })
+    socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id].name })
   })
-  socket.on('send-minutes', (room, message) =>
+  socket.on('send-minutes', (room, message, id) =>
   {
-    socket.to(room).broadcast.emit('send-minutes-message', { message: message, name: rooms[room].users[socket.id] })
+    console.log("socket.id:", id);
+    if(rooms[room].is_game_played == false)
+    {
+      io.in(room).emit('send-minutes-message', { message: message, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played });
+      rooms[room].is_game_played = true;
+      for(user in rooms[room].users)
+      {
+          user.points = 0;
+          //console.log(rooms[room].users);
+      }
+      //console.log(rooms[room].users);
+    }
+    else
+    {
+      //console.log("I got there, so what?", id);
+      io.in(room).to(id).emit('cannot-start-game');
+    }
   })
   socket.on('disconnect', () => 
   {
     getUserRooms(socket).forEach(room => 
       {
-      socket.to(room).broadcast.emit('user-disconnected', rooms[room].users[socket.id])
+      socket.to(room).broadcast.emit('user-disconnected', rooms[room].users[socket.id].name)
       delete rooms[room].users[socket.id]
       if (Object.keys(rooms[room].users).length == 0) 
       {
