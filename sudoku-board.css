@@ -3,23 +3,29 @@
     text-align: center;
 }
 
-table {
+table 
+{
   margin:1em auto;
 }
-td {
+td 
+{
   border:1px solid;
   text-align:center;
 }
-td:first-child {
+td:first-child 
+{
   border-left:solid;
 }
-td:nth-child(3n) {
-  border-right:solid ;
+td:nth-child(3n) 
+{
+  border-right:solid;
 }
-tr:first-child {
+tr:first-child 
+{
   border-top:solid;
 }
-tr:nth-child(3n) td {
+tr:nth-child(3n) td 
+{
   border-bottom:solid ;
 }
 
@@ -31,7 +37,8 @@ input[type="text"]
   text-align: center;
 }
 
-.wrapper {
+.wrapper 
+{
   text-align: center;
 }
 

@@ -10,12 +10,15 @@ app.use(express.urlencoded({ extended: true }))
 
 const rooms = { }
 
-app.get('/', (req, res) => {
+app.get('/', (req, res) => 
+{
   res.render('index', { rooms: rooms })
 })
 
-app.post('/room', (req, res) => {
-  if (rooms[req.body.room] != null) {
+app.post('/room', (req, res) => 
+{
+  if (rooms[req.body.room] != null) 
+  {
     return res.redirect('/')
   }
   rooms[req.body.room] = { users: {} }
@@ -24,8 +27,10 @@ app.post('/room', (req, res) => {
   io.emit('room-created', req.body.room)
 })
 
-app.get('/:room', (req, res) => {
-  if (rooms[req.params.room] == null) {
+app.get('/:room', (req, res) => 
+{
+  if (rooms[req.params.room] == null) 
+  {
     return res.redirect('/')
   }
   res.render('room', { roomName: req.params.room })
@@ -33,28 +38,40 @@ app.get('/:room', (req, res) => {
 
 server.listen(3000)
 
-io.on('connection', socket => {
-  socket.on('new-user', (room, name) => {
+io.on('connection', socket => 
+{
+  socket.on('new-user', (room, name) => 
+  {
     socket.join(room)
     rooms[room].users[socket.id] = name
     socket.to(room).broadcast.emit('user-connected', name)
   })
-  socket.on('send-chat-message', (room, message) => {
+  socket.on('send-chat-message', (room, message) => 
+  {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id] })
   })
-  socket.on('disconnect', () => {
-    getUserRooms(socket).forEach(room => {
+  socket.on('send-minutes', (room, message) =>
+  {
+    socket.to(room).broadcast.emit('send-minutes-message', { message: message, name: rooms[room].users[socket.id] })
+  })
+  socket.on('disconnect', () => 
+  {
+    getUserRooms(socket).forEach(room => 
+      {
       socket.to(room).broadcast.emit('user-disconnected', rooms[room].users[socket.id])
       delete rooms[room].users[socket.id]
-      if (Object.keys(rooms[room].users).length == 0) {
+      if (Object.keys(rooms[room].users).length == 0) 
+      {
         delete rooms[room];
       }
     })
   })
 })
 
-function getUserRooms(socket) {
-  return Object.entries(rooms).reduce((names, [name, room]) => {
+function getUserRooms(socket) 
+{
+  return Object.entries(rooms).reduce((names, [name, room]) => 
+  {
     if (room.users[socket.id] != null) names.push(name)
     return names
   }, [])
