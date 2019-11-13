@@ -1,24 +1,28 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
+import java.util.Arrays;
 
-public class BoardGenerator {
+public class BoardGenerator 
+{
     String jsonBoard;
     int[][] fullboard;
     int [][] board;
-
-    public BoardGenerator(int visibleFields){
-        int size=9;
-        fullboard=BoardMaker.createBoard(size);
-        Gson gson = new GsonBuilder().create();
-        String json2=gson.toJson(fullboard);
-        board=BoardMaker.boardHider(81-visibleFields, fullboard);
-        String json=gson.toJson(board);
-        JsonArray jsarray=new JsonArray();
-        jsarray.add(json2);
-        jsarray.add(json);
-        jsonBoard=jsarray.toString();
-
+    
+    public String toJson(int[][] array, int[][] array_2)
+    {
+      String json = new String();
+      json += "'{\"solver\": ";
+      json += Arrays.deepToString(array);
+      json += ", \"start_sudoku\": ";
+      json += Arrays.deepToString(array_2);
+      json += "}'";
+      return json;
     }
 
+
+    public BoardGenerator(int visibleFields)
+    {
+        int size=9;
+        jsonBoard = toJson(board, fullboard);
+        fullboard=BoardMaker.createBoard(size);
+        board=BoardMaker.boardHider(81-visibleFields, fullboard);
+    }
 }
