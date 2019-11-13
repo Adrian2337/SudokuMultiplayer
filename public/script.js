@@ -3,15 +3,28 @@ const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
-const minutes = document.getElementById('start-game')
+const minutes = document.getElementById('parameters');
 const minutesInput= document.getElementById('minutes-input');
 
-if (messageForm != null) 
+if(minutes != null)
 {
-  const name = prompt('What is your name?')
-  appendMessage(`You joined with name: ${bold_name(name)}`)
-  socket.emit('new-user', roomName, name)
+  minutes.addEventListener('submit', e => 
+  {
+      e.preventDefault();
+      const minutes = minutesInput.value;
+      socket.emit('send-minutes', roomName, minutes, socket.id)
+      minutesInput.value = ''
+  })
+}
 
+if(messageForm == null)
+{
+  var name = prompt('What is your name?')
+}
+else
+{
+  socket.emit('new-user', roomName, name)
+  appendMessage(`You joined with name: ${bold_name(name)}`)
   //ten listener powoduje ze wysylamy wiadomosc i ja emitujemy do innych
   messageForm.addEventListener('submit', e => 
   {
@@ -24,27 +37,13 @@ if (messageForm != null)
   }) 
 }
 
-if (minutes != null)
-{
-  minutes.addEventListener('submit', e => 
-  {
-    console.log("I got to minutes")
-    e.preventDefault();
-    const message = minutesInput.value;
-    appendMessage(`You chose ${message} minutes!`)
-    socket.emit('send-minutes', roomName, message)
-    minutesInput.value = ''
-  })
-}
-
-
 socket.on('room-created', room => 
 {
   const roomElement = document.createElement('div') //tworzymy diva
   roomElement.innerText = room;
   const roomLink = document.createElement('a')
   roomLink.href = `/${room}`
-  roomLink.innerText = 'join'
+  roomLink.innerText = 'Join'
   roomContainer.append(roomElement)
   roomContainer.append(roomLink)
 })
@@ -56,7 +55,12 @@ socket.on('chat-message', data =>
 
 socket.on('send-minutes-message', data => 
 {
-  appendMessage(`Someone set ${data.message} minutes to play`)
+  appendMessage(`Someone set ${data.message} minutes to play. Game starts`)
+})
+
+socket.on('cannot-start-game', () =>
+{
+  appendMessage(`You cannot start game because it already started!`)
 })
 
 socket.on('user-connected', name => 
@@ -69,10 +73,6 @@ socket.on('user-disconnected', name =>
   appendMessage(`${bold_name(name)} disconnected`)
 })
 
-/* socket.on('test-event', name => {
-  appendMessage(`Hello, ${name}!`);
-}) */
-
 function appendMessage(message) 
 {
   const messageElement = document.createElement('div')
@@ -84,6 +84,5 @@ function bold_name(name) //podkreslenie imienia
 {
   var bold_name = name
   var result = bold_name.bold(name)
-  return result
+  return result;
 }
-

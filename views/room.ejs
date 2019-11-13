@@ -1,45 +1,109 @@
 <!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Sudoku App</title>
-  <script>
-    const roomName = "<%= roomName %>"
-  </script>
-  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <script defer src="script.js"></script>
-  <style>
-      body 
-      {
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sudoku App</title>
+    <script>
+      const roomName = "<%= roomName %>"
+    </script>
+    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script defer src="script.js"></script>
+    <style>
+        body 
+        {
+          padding: 0;
+          margin: 0;
+          display: flex;
+          justify-content: center;
+        }
+    
+        #message-container 
+        {
+          width: 80%;
+          max-width: 1200px;
+          display: flex;
+          flex-direction: column;
+        }
+    
+        #message-container div 
+        {
+          background-color: #CCC;
+          padding: 5px;
+        }
+    
+        #message-container div:nth-child(2n) 
+        {
+          background-color: #FFF;
+        }
+    
+        #send-container 
+        {
+          position: fixed;
+          padding-bottom: 30px;
+          bottom: 0;
+          background-color: white;
+          max-width: 1200px;
+          width: 80%;
+          clear: both;
+          display: flex;
+        }
+    
+        #message-input 
+        {
+          clear: both;
+          flex-grow: 1;
+        }
+    
+      </style>
+  </head>
+  <body>
+    <div id="message-container"></div>
+    <form id="send-container">
+      <input type="text" id="message-input">
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </body>
+  </html> -->
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Sudoku App</title>
+      <script>
+        const roomName = "<%= roomName %>"
+      </script>
+      <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+      <script defer src="script.js"></script>
+      <style>
+        body 
+        {
         padding: 0;
         margin: 0;
         display: flex;
         justify-content: center;
-      }
-  
-      #message-container 
-      {
+        }
+        #message-container 
+        {
         width: 80%;
         max-width: 1200px;
         display: flex;
         flex-direction: column;
-      }
-  
-      #message-container div 
-      {
+        }
+        #message-container div 
+        {
         background-color: #CCC;
         padding: 5px;
-      }
-  
-      #message-container div:nth-child(2n) 
-      {
+        }
+        #message-container div:nth-child(2n) 
+        {
         background-color: #FFF;
-      }
-  
-      #send-container 
-      {
+        }
+        #send-container 
+        {
         position: fixed;
         padding-bottom: 30px;
         bottom: 0;
@@ -48,181 +112,105 @@
         width: 80%;
         clear: both;
         display: flex;
-      }
-  
-      #message-input 
-      {
+        }
+        #message-input 
+        {
         clear: both;
         flex-grow: 1;
-      }
-  
-    </style>
-</head>
-<body>
-  <div id="message-container"></div>
-  <form id="send-container">
-    <input type="text" id="message-input">
-    <button type="submit" id="send-button">Send</button>
-  </form>
-</body>
-</html> -->
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Sudoku App</title>
-  <script>
-    const roomName = "<%= roomName %>"
-  </script>
-  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <script defer src="script.js"></script>
-  <style>
-      body 
-      {
-        padding: 0;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-      }
-  
-      #message-container 
-      {
-        width: 80%;
-        max-width: 1200px;
-        display: flex;
-        flex-direction: column;
-      }
-  
-      #message-container div 
-      {
-        background-color: #CCC;
-        padding: 5px;
-      }
-  
-      #message-container div:nth-child(2n) 
-      {
-        background-color: #FFF;
-      }
-  
-      #send-container 
-      {
-        position: fixed;
-        padding-bottom: 30px;
-        bottom: 0;
-        background-color: white;
-        max-width: 1200px;
-        width: 80%;
-        clear: both;
-        display: flex;
-      }
-  
-      #message-input 
-      {
-        clear: both;
-        flex-grow: 1;
-      }
-
-      .center
-      {
-          text-align: center;
-      }
-
-      table 
-      {
+        }
+        .center
+        {
+        text-align: center;
+        }
+        table 
+        {
         margin:1em auto;
-      }
-      td 
-      {
+        }
+        td 
+        {
         border:1px solid;
         text-align:center;
-      }
-      td:first-child 
-      {
+        }
+        td:first-child 
+        {
         border-left:solid;
-      }
-      td:nth-child(3n) 
-      {
+        }
+        td:nth-child(3n) 
+        {
         border-right:solid;
-      }
-      tr:first-child 
-      {
+        }
+        tr:first-child 
+        {
         border-top:solid;
-      }
-      tr:nth-child(3n) td 
-      {
+        }
+        tr:nth-child(3n) td 
+        {
         border-bottom:solid ;
-      }
-
-      input[type="text"]
-      { 
+        }
+        input[type="text"]
+        { 
         display: inline-block;
         height: 1.4rem;
         width: 1.4rem;
         text-align: center;
-      }
-
-      .wrapper 
-      {
+        }
+        .wrapper 
+        {
         text-align: center;
-      }
-
-      #parameters
-      {
+        }
+        #parameters
+        {
         margin-top: 1.5rem;
         text-align: center;
-      }
-    </style>
-</head>
-<body>
-  <p class="center">Time remaining:
-    <input id="minutes" type="text" style="font-weight:bold"></input>
-    :
-    <input id="seconds" type="text" style="font-weight:bold"></input>
-  </p>
-  
-  <table id="sudoku"></table>
-  <script>
-    function createSudoku()
-{
-  for(var a = 0; a < 9; a++)
-  {
-     var table_row = document.createElement('tr');
-     table_row.id = `${a}`;
-     for (var b = 0; b < 9; b++)
-     {
-        var table_data = document.createElement('td');
-        table_data.id = `${b}`;
-        table_row.appendChild(table_data);
-        var sudoku_field = document.createElement('input');
-        sudoku_field.type = 'text';
-        sudoku_field.pattern = '[1-9]{1}';
-        sudoku_field.title = 'One number from 1-9';
-        sudoku_field.maxLength = 1;
-        sudoku_field.value = sudoku_field.id;
-        table_data.appendChild(sudoku_field);
-     }
-     document.getElementById("sudoku").appendChild(table_row);
-  }
-}
-
-createSudoku();
-  </script>
-  <script src="timeout.js"></script>
-  <div class="wrapper">
-    <button id="submit">Submit</button>
-  </div>
-  <form name="input" id="parameters">
-    Minutes (between 3 and 10):
-    <input type="text" id="minutes-input"></textarea>
-    <button type="submit" id="minutes-button">Start</button>
-    </form>
-  <div id="message-container"></div>
-  <form id="send-container">
-    <input type="text" id="message-input">
-    <button type="submit" id="send-button">Send</button>
-  </form>
-</body>
-</html>
+        }
+      </style>
+    </head>
+    <body>
+      <p class="center">Time remaining:
+        <input id="minutes" type="text" style="font-weight:bold"></input>
+        :
+        <input id="seconds" type="text" style="font-weight:bold"></input>
+      </p>
+      <table id="sudoku"></table>
+      <script>
+        function createSudoku()
+        {
+        for(var a = 0; a < 9; a++)
+        {
+         var table_row = document.createElement('tr');
+         table_row.id = `${a}`;
+         for (var b = 0; b < 9; b++)
+         {
+            var table_data = document.createElement('td');
+            table_data.id = `${b}`;
+            table_row.appendChild(table_data);
+            var sudoku_field = document.createElement('input');
+            sudoku_field.type = 'text';
+            sudoku_field.pattern = '[1-9]{1}';
+            sudoku_field.title = 'One number from 1-9';
+            sudoku_field.maxLength = 1;
+            sudoku_field.value = sudoku_field.id;
+            table_data.appendChild(sudoku_field);
+         }
+         document.getElementById("sudoku").appendChild(table_row);
+        }
+        }
+        
+        createSudoku();
+      </script>
+      <script src="timeout.js"></script>
+      <div class="wrapper">
+        <button id="submit">Submit</button>
+      </div>
+      <form name="input" id="parameters">
+        Minutes (between 3 and 10):
+        <input type="number" id="minutes-input" maxlength="1" min="3" max="10" required></textarea>
+        <button type="submit" id="minutes-button">Start</button>
+      </form>
+      <div id="message-container"></div>
+      <form id="send-container">
+        <input type="text" id="message-input">
+        <button type="submit" id="send-button">Send</button>
+      </form>
+    </body>
+  </html>
