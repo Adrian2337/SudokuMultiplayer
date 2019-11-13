@@ -5,6 +5,7 @@ const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
 const minutes = document.getElementById('parameters');
 const minutesInput= document.getElementById('minutes-input');
+const timeLeft = document.getElementById('seconds');
 
 if(minutes != null)
 {
@@ -12,7 +13,7 @@ if(minutes != null)
   {
       e.preventDefault();
       const minutes = minutesInput.value;
-      socket.emit('send-minutes', roomName, minutes, socket.id)
+      socket.emit('start-game', roomName, minutes, socket.id)
       minutesInput.value = ''
   })
 }
@@ -55,7 +56,7 @@ socket.on('chat-message', data =>
 
 socket.on('send-minutes-message', data => 
 {
-  appendMessage(`Someone set ${data.message} minutes to play. Game starts`)
+  appendMessage(`Someone set ${data.minutes} minutes to play. Game starts`)
 })
 
 socket.on('cannot-start-game', () =>
@@ -72,6 +73,12 @@ socket.on('user-disconnected', name =>
 {
   appendMessage(`${bold_name(name)} disconnected`)
 })
+
+socket.on('timer', function (data) 
+{
+  timeLeft.value = data.countdown;
+});
+
 
 function appendMessage(message) 
 {

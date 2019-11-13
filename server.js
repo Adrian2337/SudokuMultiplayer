@@ -50,12 +50,12 @@ io.on('connection', socket =>
   {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id].name })
   })
-  socket.on('send-minutes', (room, message, id) =>
+  socket.on('start-game', (room, minutes, id) =>
   {
     console.log("socket.id:", id);
     if(rooms[room].is_game_played == false)
     {
-      io.in(room).emit('send-minutes-message', { message: message, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played });
+      io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played });
       rooms[room].is_game_played = true;
       for(user in rooms[room].users)
       {
@@ -63,6 +63,17 @@ io.on('connection', socket =>
           //console.log(rooms[room].users);
       }
       //console.log(rooms[room].users);
+      var countdown = 15;
+      const time = setInterval( function() 
+      {
+        countdown--;
+        io.in(room).emit('timer', { countdown: countdown});
+        if (countdown < 1) 
+        {
+          clearInterval(time);
+        }
+      }, 1000);
+
     }
     else
     {
