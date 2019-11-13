@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="sudoku-board.css">
+  <title>Document</title>
+</head>
+<body>
+  <p class="center">Time remaining:
+    <input id="minutes" type="text" style="font-weight:bold"></input>
+    :
+    <input id="seconds" type="text" style="font-weight:bold"></input>
+  </p>
+
+  <table id="sudoku"></table>
+  <script src="sudoku-board.js"></script>
+  <script src="timeout.js"></script>
+  <div class="wrapper">
+    <button id="submit">Submit</button>
+  </div>
+  <form name="input" id="parameters">
+    Minutes (between 3 and 10):
+    <input type="number" name="minutes" min="3" max="10" required>
+    <button id="start_game" onClick="countdown()">Start</button>
+  </form>
+</body>
+</html>
