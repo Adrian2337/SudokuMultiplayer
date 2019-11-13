@@ -21,8 +21,8 @@ public class BoardGenerator
     public BoardGenerator(int visibleFields)
     {
         int size=9;
-        jsonBoard = toJson(board, fullboard);
         fullboard=BoardMaker.createBoard(size);
         board=BoardMaker.boardHider(81-visibleFields, fullboard);
+        jsonBoard = toJson(board, fullboard);
     }
 }
