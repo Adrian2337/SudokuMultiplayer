@@ -1,3 +1,4 @@
+package generator;
 
 public class Solver
 {

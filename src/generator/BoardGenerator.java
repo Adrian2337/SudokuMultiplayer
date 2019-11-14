@@ -1,3 +1,4 @@
+package generator;
 
 import java.util.Arrays;
 
@@ -13,7 +14,7 @@ public class BoardGenerator {
         String json = new String();
         json += "'{\"solver\": ";
         json += Arrays.deepToString(fullboard);
-        board=b.boardHider(visibleFields);
+        board=b.boardHider(81-visibleFields);
         json += ", \"start_sudoku\": ";
         json += Arrays.deepToString(board);
         json += "}'";

@@ -3,6 +3,36 @@ const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 
+
+const exec = require('child_process').exec
+
+
+let visibleFields=40, jsonBoard
+
+
+function createBoard (callback) {
+
+const cmdstring=' java -cp .\\out\\production\\SudokuMultiplayer generator.BoardCreatorMain '+ visibleFields.toString()
+exec(cmdstring,
+    function (error, stdout, stderr) {
+        if (error !== null)
+            callback(err);
+        callback(null, stdout);
+    })}
+
+    createBoard(function (err, out) {
+    jsonBoard=out
+
+
+    console.log(jsonBoard)
+        /**
+         * exec jest asynchroniczny
+         * wszystko co potrzebuje planszy musi wystartować stąd
+         */
+
+    });
+
+
 app.set('views', './views')
 app.set('view engine', 'ejs')
 app.use(express.static('public'))

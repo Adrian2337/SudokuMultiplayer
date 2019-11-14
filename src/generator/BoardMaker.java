@@ -1,9 +1,11 @@
+package generator;
+
 import java.util.ArrayList;
 
 public class BoardMaker {
-    int[][] board;
-    int size;
-    ArrayList singleRowBoard;
+     int[][] board;
+     int size;
+     ArrayList singleRowBoard;
     public BoardMaker(int size){
         board = new int[size][size];
         singleRowBoard=new ArrayList();
@@ -36,7 +38,7 @@ public class BoardMaker {
 
 
 
-    // n - liczba pól do schowania
+        // n - liczba pól do schowania
     public int[][] boardHider(int fieldsToHide){
 
         while(fieldsToHide>0){
