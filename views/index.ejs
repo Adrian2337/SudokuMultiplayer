@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta http-equiv="refresh" content="5" />
-  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="http://localhost:8080/socket.io/socket.io.js"></script>
   <script defer src="prompt.js"></script>
   <script defer src="script.js"></script>
   <title>Sudoku App</title>
 </head>
 <body>
-    <div id="room-container">
+    <div id="room-container"></div>
         <% Object.keys(rooms).forEach(room => { %>
           <div><%= room %></div>
           <a href="/<%= room %>">Join</a>

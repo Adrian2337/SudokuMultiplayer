@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000')
+const socket = io('http://localhost:8080')
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const messageForm = document.getElementById('send-container')
@@ -6,6 +6,16 @@ const messageInput = document.getElementById('message-input')
 const minutes = document.getElementById('parameters');
 const minutesInput= document.getElementById('minutes-input');
 const timeLeft = document.getElementById('seconds');
+const sudoku_board = document.getElementById('sudoku');
+const button_sudoku = document.getElementById('submit-sudoku');
+
+if(button_sudoku != null)
+{
+  button_sudoku.addEventListener("click", function(sudoku_board)
+  {
+    appendMessage("You submitted your sudoku");
+  })
+}
 
 if(minutes != null)
 {
@@ -57,6 +67,28 @@ socket.on('chat-message', data =>
 socket.on('send-minutes-message', data => 
 {
   appendMessage(`Someone set ${data.minutes} minutes to play. Game starts`)
+  for (var a = 0; a < data.sudoku.length; a++)
+  {
+    for (var b = 0; b < data.sudoku[a].length; b++)
+    {
+      const x = sudoku_board.children.namedItem(`${a}`).children.namedItem(`${b}`).firstElementChild;
+      x.value = "";
+      if(x.hasAttribute("onkeydown"))
+      {
+        x.removeAttribute("onkeydown");
+      }
+      if(data.sudoku[a][b] > 0)
+      {
+        x.value = data.sudoku[a][b];
+        x.style = "background-color: #808080; color: #ffffff";
+        x.setAttribute("onkeydown", "return false");
+      }
+      else
+      {
+         x.style = "background-color: #ffffff";
+      }
+    }
+  }
 })
 
 socket.on('cannot-start-game', () =>
@@ -77,8 +109,12 @@ socket.on('user-disconnected', name =>
 socket.on('timer', function (data) 
 {
   timeLeft.value = data.countdown;
-});
+  if(timeLeft.value < 1)
+  {
+    appendMessage(`Time's up!`) //sending checking and so on 
 
+  }
+});
 
 function appendMessage(message) 
 {
