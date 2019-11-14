@@ -147,7 +147,7 @@ function preprocess_sudoku(client_array, solver_array)
             {
                 correct_fields++;
             }
-            else if(client_array[a][b] === "")
+            else if(client_array[a][b] === 0)
             {
                 void_fields++;
             }
