@@ -11,9 +11,9 @@ const button_sudoku = document.getElementById('submit-sudoku');
 
 if(button_sudoku != null)
 {
-  button_sudoku.addEventListener("click", function(sudoku_board)
+  button_sudoku.addEventListener("click", function()
   {
-    appendMessage("You submitted your sudoku");
+     submit();
   })
 }
 
@@ -112,7 +112,7 @@ socket.on('timer', function (data)
   if(timeLeft.value < 1)
   {
     appendMessage(`Time's up!`) //sending checking and so on 
-
+    socket.emit('submit-sudoku', roomName,)
   }
 });
 
@@ -128,4 +128,37 @@ function bold_name(name) //podkreslenie imienia
   var bold_name = name
   var result = bold_name.bold(name)
   return result;
+}
+
+function submit()
+{
+  appendMessage("You submitted your sudoku");
+  console.log(get_sudoku_board_from_client());
+}
+
+function get_sudoku_board_from_client()
+{
+   var array = new Array(9);
+
+   for (var i = 0; i < array.length; i++) 
+   { 
+    array[i] = new Array(9); 
+   } 
+  
+   for (var a = 0; a < 9; a++)
+   {
+      for(var b = 0; b < 9; b++)
+      {
+        const x = sudoku_board.children.namedItem(`${a}`).children.namedItem(`${b}`).firstChild;
+        if(x.value != "")
+        {
+          array[a][b] = parseInt(x.value);
+        }
+        else
+        {
+          array[a][b] = 0;
+        }
+      }
+   }
+   return array;
 }
