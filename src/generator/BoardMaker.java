@@ -1,6 +1,17 @@
+<<<<<<< HEAD:java_generator/BoardMaker.java
 public class BoardMaker {
     static int[][] board;
     static int size;
+=======
+package generator;
+
+import java.util.ArrayList;
+
+public class BoardMaker {
+     int[][] board;
+     int size;
+     ArrayList singleRowBoard;
+>>>>>>> c51794d... rwgwe:src/generator/BoardMaker.java
     public BoardMaker(int size){
         board = new int[size][size];
         this.size=size;
@@ -32,8 +43,13 @@ public class BoardMaker {
 
 
         // n - liczba pól do schowania
+<<<<<<< HEAD:java_generator/BoardMaker.java
     public static int[][] boardHider(int fieldsToHide, int[][] Board){
     board=Board;
+=======
+    public int[][] boardHider(int fieldsToHide){
+
+>>>>>>> c51794d... rwgwe:src/generator/BoardMaker.java
         while(fieldsToHide>0){
             int x=randomInt(9)-1;
             int y=randomInt(9)-1;
