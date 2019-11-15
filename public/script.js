@@ -13,7 +13,9 @@ if(button_sudoku != null)
 {
   button_sudoku.addEventListener("click", function()
   {
-     submit();
+    console.log("socket.id on click: ", socket.id);
+    console.log("roomName: ", roomName);
+    socket.emit('submit-sudoku', roomName, get_sudoku_board_from_client(), socket.id);
   })
 }
 
@@ -34,7 +36,8 @@ if(messageForm == null)
 }
 else
 {
-  socket.emit('new-user', roomName, name)
+  var has_submitted = false;
+  socket.emit('new-user', roomName, name, 0, false)
   appendMessage(`You joined with name: ${bold_name(name)}`)
   //ten listener powoduje ze wysylamy wiadomosc i ja emitujemy do innych
   messageForm.addEventListener('submit', e => 
@@ -57,6 +60,7 @@ socket.on('room-created', room =>
   roomLink.innerText = 'Join'
   roomContainer.append(roomElement)
   roomContainer.append(roomLink)
+  
 })
 
 socket.on('chat-message', data => 
@@ -91,6 +95,10 @@ socket.on('send-minutes-message', data =>
   }
 })
 
+socket.on('game-has-ended', check => {
+  appendMessage(check);
+});
+
 socket.on('cannot-start-game', () =>
 {
   appendMessage(`You cannot start game because it already started!`)
@@ -106,15 +114,30 @@ socket.on('user-disconnected', name =>
   appendMessage(`${bold_name(name)} disconnected`)
 })
 
-socket.on('timer', function (data) 
+socket.on('timer', function(data) 
 {
   timeLeft.value = data.countdown;
   if(timeLeft.value < 1)
   {
     appendMessage(`Time's up!`) //sending checking and so on 
-    socket.emit('submit-sudoku', roomName,)
+    socket.emit('submit-sudoku', roomName, get_sudoku_board_from_client(), socket.id)
   }
 });
+
+socket.on('first-message', () =>
+{
+  appendMessage("Submitting sudoku...")
+})
+
+socket.on('second-message', points =>
+{
+  appendMessage(`You've scored ${points} points`);
+});
+
+socket.on('third-message', () =>
+{
+  appendMessage("You've already submitted your sudoku");
+})
 
 function appendMessage(message) 
 {
@@ -128,12 +151,6 @@ function bold_name(name) //podkreslenie imienia
   var bold_name = name
   var result = bold_name.bold(name)
   return result;
-}
-
-function submit()
-{
-  appendMessage("You submitted your sudoku");
-  console.log(get_sudoku_board_from_client());
 }
 
 function get_sudoku_board_from_client()
@@ -150,15 +167,9 @@ function get_sudoku_board_from_client()
       for(var b = 0; b < 9; b++)
       {
         const x = sudoku_board.children.namedItem(`${a}`).children.namedItem(`${b}`).firstChild;
-        if(x.value != "")
-        {
-          array[a][b] = parseInt(x.value);
-        }
-        else
-        {
-          array[a][b] = 0;
-        }
+        array[a][b] = parseInt(x.value);
       }
    }
+   console.log("array from client:", array);
    return array;
 }
