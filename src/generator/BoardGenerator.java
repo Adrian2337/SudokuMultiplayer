@@ -12,12 +12,12 @@ public class BoardGenerator {
         BoardMaker b=BoardMaker.createBoard(size);
         fullboard=b.getBoard();
         String json = new String();
-        json += "'{\"solver\": ";
+        json += "{\"solver\": ";
         json += Arrays.deepToString(fullboard);
         board=b.boardHider(81-visibleFields);
         json += ", \"start_sudoku\": ";
         json += Arrays.deepToString(board);
-        json += "}'";
+        json += "}";
         jsonBoard=json;
     }
 }

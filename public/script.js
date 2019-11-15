@@ -62,6 +62,7 @@ socket.on('room-created', room =>
   roomLink.innerText = 'Join'
   roomContainer.append(roomElement)
   roomContainer.append(roomLink)
+  
 })
 
 socket.on('chat-message', data => 
