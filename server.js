@@ -199,3 +199,23 @@ function calculate_points(a, b, c, d = [correct_f, void_f, incorrect_f])
 {
     return a*d[0]+b*d[1]+c*d[2]
 }
+
+function sort_results(associative_array)
+{
+  var array = [];
+  console.log("array as:", associative_array);
+  for(var user in associative_array)
+  {
+    if(associative_array[user].has_submitted == false)
+    {
+        return null;
+    }
+    array.push([associative_array[user].name, associative_array[user].points]);
+  }
+  array.sort(function(a,b) 
+  {
+    return b[1]-a[1];
+  });
+  return array;
+
+}
