@@ -73,9 +73,29 @@ io.on('connection', socket =>
   {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id].name })
   })
-  socket.on('submit-sudoku', (room) =>
+  socket.on('submit-sudoku', (room, submited_sudoku, id) => 
   {
-
+     console.log("id:", id);
+     console.log("socket.id: ", socket.id)
+     if(rooms[room].users[id].has_submitted === false)
+     {
+        rooms[room].users[id].has_submitted = true;
+        io.in(room).to(id).emit('first-message');
+        console.log("submited_sudoku: ", submited_sudoku);
+        console.log("sudoku_answer: ", rooms[room].sudoku_answer);
+        rooms[room].users[socket.id].points = calculate_points(1, 0, -1, preprocess_sudoku(submited_sudoku, rooms[room].sudoku_answer));
+        io.in(room).to(id).emit('second-message', rooms[room].users[id].points);
+        var check = sort_results(rooms[room].users);
+        if(check !== null)
+        {
+           io.in(room).emit('game-has-ended', check);
+           rooms[room].is_game_played = false;
+        }
+     }
+     else
+     {
+        io.in(room).to(id).emit('third-message');
+     }
   })
   socket.on('end-game', (room) =>
   {
@@ -96,30 +116,29 @@ io.on('connection', socket =>
            // const sudoku = generate_new_game(Math.floor(Math.random()*10));
             const sudoku=JSON.parse(jsonBoard)
             io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
-
+      
             rooms[room].is_game_played = true;
             rooms[room].sudoku_answer = sudoku.solver;
             for(user in rooms[room].users)
             {
-                user.points = 0;
-                //console.log(rooms[room].users);
+                rooms[room].users[user].points = 0;
+                rooms[room].users[user].has_submitted = false;
+                console.log(rooms[room]);
             }
-            //console.log(rooms[room].users);
-            var countdown = 60000;
-            const time = setInterval( function()
+            var countdown = 30;
+            const time = setInterval( function() 
             {
                 countdown--;
                 io.in(room).emit('timer', { countdown: countdown});
-                if (countdown < 1)
+                if (countdown < 1) 
                 {
-                    clearInterval(time);
+                     clearInterval(time);
                     if(rooms[room] != null)
                     {
-                        rooms[room].is_game_played = false;
+                    rooms[room].is_game_played = false;
                     }
                 }
             }, 1000);
-
         });
 
     }
@@ -181,7 +200,7 @@ function preprocess_sudoku(client_array, solver_array)
             {
                 correct_fields++;
             }
-            else if(client_array[a][b] === 0)
+            else if(client_array[a][b] === null)
             {
                 void_fields++;
             }
@@ -197,6 +216,7 @@ function preprocess_sudoku(client_array, solver_array)
 
 function calculate_points(a, b, c, d = [correct_f, void_f, incorrect_f])
 {
+    console.log(d[0],d[1],d[2]);
     return a*d[0]+b*d[1]+c*d[2]
 }
 
