@@ -55,13 +55,9 @@ io.on('connection', socket =>
   })
   socket.on('submit-sudoku', (room, submited_sudoku, id) => 
   {
-     console.log("id:", id);
-     console.log("socket.id: ", socket.id)
      if(rooms[room].users[id].has_submitted === false)
      {
         rooms[room].users[id].has_submitted = true;
-        console.log("submited_sudoku: ", submited_sudoku);
-        console.log("sudoku_answer: ", rooms[room].sudoku_answer);
         rooms[room].users[socket.id].points = calculate_points(1, 0, -1, preprocess_sudoku(submited_sudoku, rooms[room].sudoku_answer));
         io.in(room).emit('first-message', rooms[room].users[id].name);
         var check = sort_results(rooms[room].users);
@@ -87,7 +83,6 @@ io.on('connection', socket =>
     {
         createBoard(function (err, out) {
             jsonBoard=out
-            console.log("jsonBoard", jsonBoard);
             /**
              * exec jest asynchroniczny
              * wszystko co potrzebuje planszy musi wystartować stąd
@@ -101,7 +96,6 @@ io.on('connection', socket =>
             {
                 rooms[room].users[user].points = 0;
                 rooms[room].users[user].has_submitted = false;
-                console.log(rooms[room]);
             }
             var countdown = 30;
             const time = setInterval( function() 
@@ -173,14 +167,12 @@ function preprocess_sudoku(client_array, solver_array)
 
 function calculate_points(a, b, c, d = [correct_f, void_f, incorrect_f])
 {
-    console.log(d[0],d[1],d[2]);
     return a*d[0]+b*d[1]+c*d[2]
 }
 
 function sort_results(associative_array)
 {
   var array = [];
-  console.log("array as:", associative_array);
   for(var user in associative_array)
   {
     if(associative_array[user].has_submitted == false)

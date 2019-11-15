@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - BoardCreatorMain",
+      "request": "launch",
+      "mainClass": "BoardCreatorMain",
+      "projectName": "SudokuMultiplayer_31f94fc7"
+    }
+  ]
+}
