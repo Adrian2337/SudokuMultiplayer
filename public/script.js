@@ -100,11 +100,6 @@ socket.on('game-has-ended', check => {
   appendMessage(check);
 });
 
-socket.on('cannot-start-game', () =>
-{
-  appendMessage(`You cannot start game because it already started!`)
-})
-
 socket.on('user-connected', name => 
 {
   appendMessage(`${bold_name(name)} connected`)
@@ -125,9 +120,9 @@ socket.on('timer', function(data)
   }
 });
 
-socket.on('first-message', () =>
+socket.on('first-message', (name) =>
 {
-  appendMessage("Submitting sudoku...")
+  appendMessage(`${name} has submmited sudoku.`)
 })
 
 socket.on('second-message', points =>
