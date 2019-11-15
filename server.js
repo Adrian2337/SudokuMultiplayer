@@ -60,11 +60,10 @@ io.on('connection', socket =>
      if(rooms[room].users[id].has_submitted === false)
      {
         rooms[room].users[id].has_submitted = true;
-        io.in(room).to(id).emit('first-message');
         console.log("submited_sudoku: ", submited_sudoku);
         console.log("sudoku_answer: ", rooms[room].sudoku_answer);
         rooms[room].users[socket.id].points = calculate_points(1, 0, -1, preprocess_sudoku(submited_sudoku, rooms[room].sudoku_answer));
-        io.in(room).to(id).emit('second-message', rooms[room].users[id].points);
+        io.in(room).emit('first-message', rooms[room].users[id].name);
         var check = sort_results(rooms[room].users);
         if(check !== null)
         {
@@ -72,14 +71,6 @@ io.on('connection', socket =>
            rooms[room].is_game_played = false;
         }
      }
-     else
-     {
-        io.in(room).to(id).emit('third-message');
-     }
-  })
-  socket.on('end-game', (room) =>
-  {
-    io.in(room)
   })
   socket.on('start-game', (room, minutes, id, difficulty) =>
   {
@@ -117,9 +108,9 @@ io.on('connection', socket =>
             {
                 countdown--;
                 io.in(room).emit('timer', { countdown: countdown});
-                if (countdown < 1) 
+                if (countdown < 1 || rooms[room].is_game_played === false) 
                 {
-                     clearInterval(time);
+                    clearInterval(time);
                     if(rooms[room] != null)
                     {
                     rooms[room].is_game_played = false;
@@ -128,11 +119,6 @@ io.on('connection', socket =>
             }, 1000);
         });
 
-    }
-    else
-    {
-      //console.log("I got there, so what?", id);
-      io.in(room).to(id).emit('cannot-start-game');
     }
   })
   socket.on('disconnect', () =>
@@ -223,4 +209,3 @@ function createBoard (callback)
     return stdout;
   })
 }
-
