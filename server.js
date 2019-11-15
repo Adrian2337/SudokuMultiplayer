@@ -2,29 +2,21 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
-
-
 const exec = require('child_process').exec
 
+let jsonBoard
+let visibleFields
 
-let visibleFields=40, jsonBoard
-
-
-function createBoard (callback) {
-
-const cmdstring=' java -cp .\\src generator.BoardCreatorMain '+ visibleFields.toString()
-exec(cmdstring,
-    function (error, stdout, stderr) {
+function createBoard (callback) 
+{
+  const cmdstring=' java -cp SudokuMultiplayer\\generator generator.BoardCreatorMain '+ visibleFields.toString()
+  exec(cmdstring, function (error, stdout, stderr) 
+  {
         if (error !== null)
             callback(stderr);
-        callback(null, stdout);
-        return stdout
-    })}
-
-
-
-
-
+        callback(stdout);
+  })
+}
 
 app.set('views', './views')
 app.set('view engine', 'ejs')
@@ -63,16 +55,21 @@ server.listen(8080)
 
 io.on('connection', socket =>
 {
+<<<<<<< HEAD
   socket.on('new-user', (room, name, points) =>
+=======
+  socket.on('new-user', (room, name, points, has_submitted) => 
+>>>>>>> 486e8f5... Can run another game
   {
     socket.join(room)
-    rooms[room].users[socket.id] = {name, points}
+    rooms[room].users[socket.id] = {name, points, has_submitted}
     socket.to(room).broadcast.emit('user-connected', name)
   })
   socket.on('send-chat-message', (room, message) =>
   {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id].name })
   })
+<<<<<<< HEAD
   socket.on('submit-sudoku', (room) =>
   {
 
@@ -80,11 +77,37 @@ io.on('connection', socket =>
   socket.on('end-game', (room) =>
   {
     io.in(room)
+=======
+  socket.on('submit-sudoku', (room, submited_sudoku, id) => 
+  {
+     console.log("id:", id);
+     console.log("socket.id: ", socket.id)
+     if(rooms[room].users[id].has_submitted === false)
+     {
+        rooms[room].users[id].has_submitted = true;
+        io.in(room).to(id).emit('first-message');
+        console.log("submited_sudoku: ", submited_sudoku);
+        console.log("sudoku_answer: ", rooms[room].sudoku_answer);
+        rooms[room].users[socket.id].points = calculate_points(1, 0, -1, preprocess_sudoku(submited_sudoku, rooms[room].sudoku_answer));
+        io.in(room).to(id).emit('second-message', rooms[room].users[id].points);
+        var check = sort_results(rooms[room].users);
+        if(check !== null)
+        {
+           io.in(room).emit('game-has-ended', check);
+           rooms[room].is_game_played = false;
+        }
+     }
+     else
+     {
+        io.in(room).to(id).emit('third-message');
+     }
+>>>>>>> 486e8f5... Can run another game
   })
   socket.on('start-game', (room, minutes, id) =>
   {
     if(rooms[room].is_game_played == false)
     {
+<<<<<<< HEAD
         createBoard(function (err, out) {
             jsonBoard=out
 
@@ -121,6 +144,34 @@ io.on('connection', socket =>
             }, 1000);
 
         });
+=======
+      const sudoku = generate_new_game(Math.floor(Math.random()*10));
+      // const sudoku = generate_new_game_2(40);
+      io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
+      
+      rooms[room].is_game_played = true;
+      rooms[room].sudoku_answer = sudoku.solver;
+      for(user in rooms[room].users)
+      {
+          rooms[room].users[user].points = 0;
+          rooms[room].users[user].has_submitted = false;
+          console.log(rooms[room]);
+      }
+      var countdown = 30;
+      const time = setInterval( function() 
+      {
+        countdown--;
+        io.in(room).emit('timer', { countdown: countdown});
+        if (countdown < 1) 
+        {
+          clearInterval(time);
+          if(rooms[room] != null)
+          {
+            rooms[room].is_game_played = false;
+          }
+        }
+      }, 1000);
+>>>>>>> 486e8f5... Can run another game
 
     }
     else
@@ -168,6 +219,21 @@ function generate_new_game(n)
   return array[n];
 }
 
+function generate_new_game_2(n)
+{
+  visible_fields = n;
+  createBoard(function (err, out) 
+  {
+
+    jsonBoard=out
+        /**
+         * exec jest asynchroniczny
+         * wszystko co potrzebuje planszy musi wystartować stąd
+         */
+  });
+  return jsonBoard;
+}
+
 function preprocess_sudoku(client_array, solver_array)
 {
     var correct_fields = 0;
@@ -181,7 +247,7 @@ function preprocess_sudoku(client_array, solver_array)
             {
                 correct_fields++;
             }
-            else if(client_array[a][b] === 0)
+            else if(client_array[a][b] === null)
             {
                 void_fields++;
             }
@@ -191,11 +257,32 @@ function preprocess_sudoku(client_array, solver_array)
             }
         }
     }
-
+    
     return [correct_fields, void_fields, incorrect_fields];
 }
 
 function calculate_points(a, b, c, d = [correct_f, void_f, incorrect_f])
 {
+    console.log(d[0],d[1],d[2]);
     return a*d[0]+b*d[1]+c*d[2]
+}
+
+function sort_results(associative_array)
+{
+  var array = [];
+  console.log("array as:", associative_array);
+  for(var user in associative_array)
+  {
+    if(associative_array[user].has_submitted == false)
+    {
+        return null;
+    }
+    array.push([associative_array[user].name, associative_array[user].points]);
+  }
+  array.sort(function(a,b) 
+  {
+    return b[1]-a[1];
+  });
+  return array;
+
 }
