@@ -12,14 +12,21 @@
       <script defer src="http://localhost:8080/socket.io/socket.io.js"></script>
       <script defer src="script.js"></script>
       <style>
-        #message-container 
+        #message-container, #send-container, #select-container
+        {
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .select-class
+        {
+          margin: auto 0px;
+        }
+        #message-container
         {
         max-width: 100vw;
         font-size: 1rem;
         word-wrap: break-word;
         display: flex;
-        margin-left: auto;
-        margin-right: auto;
         flex-direction: column;
         position: relative;
         }
@@ -39,8 +46,6 @@
         bottom: 0;
         background-color: white;
         clear: both;
-        margin-left: auto;
-        margin-right: auto;
         display: flex;
         }
         #message-input 
@@ -100,6 +105,11 @@
         margin-top: 1.5rem;
         text-align: center;
         }
+        select 
+        {
+          display: block;
+          margin: 0.5rem auto;
+        }
       </style>
     </head>
     <body>
@@ -145,6 +155,14 @@
         <input type="number" id="minutes-input" maxlength="1" min="3" max="10" required></textarea>
         <button type="submit" id="minutes-button">Start</button>
       </form>
+      <p class="center">Difficulty level:</p>
+        <select id="level">
+              <option value="1">Hard</option>
+              <option value="2">Medium</option>
+              <option value="3">Easy</option>
+              <option value="4">Supereasy</option>
+        </select>
+      
       <form id="send-container">
         <input type="text" id="message-input">
         <button type="submit" id="send-button">Send</button>
