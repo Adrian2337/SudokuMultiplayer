@@ -8,6 +8,7 @@ const minutesInput= document.getElementById('minutes-input');
 const timeLeft = document.getElementById('seconds');
 const sudoku_board = document.getElementById('sudoku');
 const button_sudoku = document.getElementById('submit-sudoku');
+const selector = document.getElementById('level');
 
 if(button_sudoku != null)
 {
@@ -25,7 +26,8 @@ if(minutes != null)
   {
       e.preventDefault();
       const minutes = minutesInput.value;
-      socket.emit('start-game', roomName, minutes, socket.id)
+      const value = selector[selector.selectedIndex].value;
+      socket.emit('start-game', roomName, minutes, socket.id, value)
       minutesInput.value = ''
   })
 }
