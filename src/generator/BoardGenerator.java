@@ -1,8 +1,5 @@
-<<<<<<< HEAD:java_generator/BoardGenerator.java
-=======
 package generator;
 
->>>>>>> c51794d... rwgwe:src/generator/BoardGenerator.java
 import java.util.Arrays;
 
 public class BoardGenerator 
@@ -26,21 +23,15 @@ public class BoardGenerator
     public BoardGenerator(int visibleFields)
     {
         int size=9;
-<<<<<<< HEAD:java_generator/BoardGenerator.java
-        fullboard=BoardMaker.createBoard(size);
-        board=BoardMaker.boardHider(81-visibleFields, fullboard);
-        jsonBoard = toJson(board, fullboard);
-=======
         BoardMaker b=BoardMaker.createBoard(size);
         fullboard=b.getBoard();
         String json = new String();
-        json += "'{\"solver\": ";
+        json += "{\"solver\": ";
         json += Arrays.deepToString(fullboard);
         board=b.boardHider(81-visibleFields);
         json += ", \"start_sudoku\": ";
         json += Arrays.deepToString(board);
-        json += "}'";
+        json += "}";
         jsonBoard=json;
->>>>>>> c51794d... rwgwe:src/generator/BoardGenerator.java
     }
 }

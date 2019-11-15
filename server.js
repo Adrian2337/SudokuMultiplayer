@@ -18,19 +18,12 @@ exec(cmdstring,
         if (error !== null)
             callback(stderr);
         callback(null, stdout);
+        return stdout
     })}
 
-    createBoard(function (err, out) {
-    jsonBoard=out
 
 
-    console.log(jsonBoard)
-        /**
-         * exec jest asynchroniczny
-         * wszystko co potrzebuje planszy musi wystartować stąd
-         */
 
-    });
 
 
 app.set('views', './views')
@@ -92,31 +85,42 @@ io.on('connection', socket =>
   {
     if(rooms[room].is_game_played == false)
     {
-      const sudoku = generate_new_game(Math.floor(Math.random()*10));
-      io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
+        createBoard(function (err, out) {
+            jsonBoard=out
 
-      rooms[room].is_game_played = true;
-      rooms[room].sudoku_answer = sudoku.solver;
-      for(user in rooms[room].users)
-      {
-          user.points = 0;
-          //console.log(rooms[room].users);
-      }
-      //console.log(rooms[room].users);
-      var countdown = 60000;
-      const time = setInterval( function()
-      {
-        countdown--;
-        io.in(room).emit('timer', { countdown: countdown});
-        if (countdown < 1)
-        {
-          clearInterval(time);
-          if(rooms[room] != null)
-          {
-            rooms[room].is_game_played = false;
-          }
-        }
-      }, 1000);
+            //console.log(jsonBoard)
+            /**
+             * exec jest asynchroniczny
+             * wszystko co potrzebuje planszy musi wystartować stąd
+             */
+           // const sudoku = generate_new_game(Math.floor(Math.random()*10));
+            const sudoku=JSON.parse(jsonBoard)
+            io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
+
+            rooms[room].is_game_played = true;
+            rooms[room].sudoku_answer = sudoku.solver;
+            for(user in rooms[room].users)
+            {
+                user.points = 0;
+                //console.log(rooms[room].users);
+            }
+            //console.log(rooms[room].users);
+            var countdown = 60000;
+            const time = setInterval( function()
+            {
+                countdown--;
+                io.in(room).emit('timer', { countdown: countdown});
+                if (countdown < 1)
+                {
+                    clearInterval(time);
+                    if(rooms[room] != null)
+                    {
+                        rooms[room].is_game_played = false;
+                    }
+                }
+            }, 1000);
+
+        });
 
     }
     else
