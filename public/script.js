@@ -1,4 +1,4 @@
-const socket = io('http://localhost:8080')
+const socket = io(window.location.origin)
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const messageForm = document.getElementById('send-container')
@@ -14,8 +14,6 @@ if(button_sudoku != null)
 {
   button_sudoku.addEventListener("click", function()
   {
-    console.log("socket.id on click: ", socket.id);
-    console.log("roomName: ", roomName);
     socket.emit('submit-sudoku', roomName, get_sudoku_board_from_client(), socket.id);
   })
 }
@@ -166,6 +164,5 @@ function get_sudoku_board_from_client()
         array[a][b] = parseInt(x.value);
       }
    }
-   console.log("array from client:", array);
    return array;
 }
