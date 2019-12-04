@@ -15,6 +15,7 @@ const rooms = { }
 
 app.get('/', (req, res) => 
 {
+  io.emit('update-rooms', rooms);
   res.render('index', { rooms: rooms })
 })
 
@@ -27,7 +28,7 @@ app.post('/room', (req, res) =>
   rooms[req.body.room] = { users: {}, is_game_played: false, sudoku_answer: [] }
   res.redirect(req.body.room)
   // Send message that new room was created
-  io.emit('room-created', req.body.room)
+  io.emit('update-rooms', rooms)
 })
 
 app.get('/:room', (req, res) =>
@@ -48,6 +49,7 @@ io.on('connection', socket =>
     socket.join(room)
     rooms[room].users[socket.id] = {name, points}
     socket.to(room).broadcast.emit('user-connected', name)
+    console.log(`new user ${rooms[room].users[socket.id].name} with socket.id: `, socket.id);
   })
   socket.on('send-chat-message', (room, message) =>
   {
@@ -97,33 +99,46 @@ io.on('connection', socket =>
                 rooms[room].users[user].points = 0;
                 rooms[room].users[user].has_submitted = false;
             }
-            var countdown = 30;
+            var countdown = 60*minutes;
             const time = setInterval( function() 
             {
                 countdown--;
                 io.in(room).emit('timer', { countdown: countdown});
-                if (countdown < 1 || rooms[room].is_game_played === false) 
+                if(rooms[room] != null)
                 {
-                    clearInterval(time);
-                    if(rooms[room] != null)
-                    {
-                    rooms[room].is_game_played = false;
-                    }
+                  if (countdown < 1 || rooms[room].is_game_played === false) 
+                  {
+                      clearInterval(time);
+                      if(rooms[room] != null)
+                      {
+                      rooms[room].is_game_played = false;
+                      }
+                  }
                 }
-            }, 1000);
+              }, 1000);
         });
 
     }
   })
   socket.on('disconnect', () =>
   {
+    console.log("getUserRooms for socket: ", getUserRooms(socket));
     getUserRooms(socket).forEach(room =>
       {
       socket.to(room).broadcast.emit('user-disconnected', rooms[room].users[socket.id].name)
+      console.log("DELETING SOCKET...", socket.id);
       delete rooms[room].users[socket.id]
+      console.log("no of users: ", Object.keys(rooms[room].users).length);
       if (Object.keys(rooms[room].users).length == 0)
       {
+        console.log("DELETING ROOM ", room);
         delete rooms[room];
+        io.emit('update-rooms', rooms);
+      }
+      else
+      {
+        console.log("CANNOT DELETE ROOM ", room);
+        console.log("users:", Object.keys(rooms[room].users));
       }
     })
   })
@@ -140,6 +155,7 @@ function getUserRooms(socket)
 
 function preprocess_sudoku(client_array, solver_array)
 {
+    console.log(client_array);
     var correct_fields = 0;
     var void_fields = 0;
     var incorrect_fields = 0;
@@ -179,7 +195,7 @@ function sort_results(associative_array)
     {
         return null;
     }
-    array.push([associative_array[user].name, associative_array[user].points]);
+    array.push([associative_array[user].name, associative_array[user].points-visibleFields]);
   }
   array.sort(function(a,b) 
   {

@@ -54,13 +54,61 @@ else
 socket.on('room-created', room => 
 {
   const roomElement = document.createElement('div') //tworzymy diva
+  roomElement.setAttribute('class', 'room');
   roomElement.innerText = room;
   const roomLink = document.createElement('a')
+  roomLink.setAttribute('class', 'link');
   roomLink.href = `/${room}`
   roomLink.innerText = 'Join'
   roomContainer.append(roomElement)
   roomContainer.append(roomLink)
-  
+})
+
+socket.on('update-rooms', rooms =>
+{
+  console.log("ROOM DELETED I'M GETTING THERE")
+  if(roomContainer != null)
+  {
+    roomContainer.innerHTML = "";
+  }
+  console.log("rooms: ", rooms);
+  var list = Object.keys(rooms);
+  console.log("list: ", list);
+  for (var room in list)
+  {
+    var roomElement = document.createElement('div') //tworzymy diva
+    roomElement.setAttribute('class', 'room');
+    roomElement.innerText = list[room];
+    var roomLink = document.createElement('a')
+    if(roomLink != null)
+    {
+      roomLink.setAttribute('class', 'link');
+      roomLink.href = `/${list[room]}`
+      roomLink.innerText = 'Join'
+    }
+    if(roomContainer != null)
+    {
+      roomContainer.append(roomElement)
+      roomContainer.append(roomLink)
+    }
+  }
+  /* var list = document.getElementsByClassName('room')
+  for (var i = 0; i < list.length; i++) 
+  {
+    console.log(list[i]);
+    if (list[i].innerHTML === room)
+    {
+      roomContainer.remove(list[i]);
+    }
+  }
+  var list_2 = document.getElementsByClassName('link')
+  for (var i = 0; i < list_2.length; i++) 
+  {
+    if (list_2[i].href === `/${room}`)
+    {
+      roomContainer.remove(list_2[i]);
+    }
+  } */
 })
 
 socket.on('chat-message', data => 
@@ -121,7 +169,7 @@ socket.on('timer', function(data)
 
 socket.on('first-message', (name) =>
 {
-  appendMessage(`${name} has submmited sudoku.`)
+  appendMessage(`${name} has submitted sudoku.`)
 })
 
 socket.on('second-message', points =>
@@ -155,7 +203,7 @@ function get_sudoku_board_from_client()
    for (var i = 0; i < array.length; i++) 
    { 
     array[i] = new Array(9); 
-   } 
+   }
   
    for (var a = 0; a < 9; a++)
    {
