@@ -44,10 +44,10 @@ server.listen(8080)
 
 io.on('connection', socket =>
 {
-  socket.on('new-user', (room, name, points) =>
+  socket.on('new-user', (room, name, points, is_playing) =>
   {
     socket.join(room)
-    rooms[room].users[socket.id] = {name, points}
+    rooms[room].users[socket.id] = {name, points, is_playing}
     socket.to(room).broadcast.emit('user-connected', name)
     console.log(`new user ${rooms[room].users[socket.id].name} with socket.id: `, socket.id);
   })
@@ -57,7 +57,7 @@ io.on('connection', socket =>
   })
   socket.on('submit-sudoku', (room, submited_sudoku, id) => 
   {
-     if(rooms[room].users[id].has_submitted === false)
+     if(rooms[room].users[id].has_submitted === false && rooms[room].users[id].is_playing === true)
      {
         rooms[room].users[id].has_submitted = true;
         rooms[room].users[socket.id].points = calculate_points(1, 0, -1, preprocess_sudoku(submited_sudoku, rooms[room].sudoku_answer));
@@ -98,6 +98,7 @@ io.on('connection', socket =>
             {
                 rooms[room].users[user].points = 0;
                 rooms[room].users[user].has_submitted = false;
+                rooms[room].users[user].is_playing = true;
             }
             var countdown = 60*minutes;
             const time = setInterval( function() 
@@ -191,11 +192,18 @@ function sort_results(associative_array)
   var array = [];
   for(var user in associative_array)
   {
-    if(associative_array[user].has_submitted == false)
+    if(associative_array[user].has_submitted === false && associative_array[user].is_playing === true)
     {
         return null;
     }
-    array.push([associative_array[user].name, associative_array[user].points-visibleFields]);
+    if(associative_array[user].has_submitted === true)
+    {
+      array.push([associative_array[user].name, associative_array[user].points-visibleFields]);
+      if(associative_array[user].is_playing === true)
+      {
+        associative_array[user].is_playing = false;
+      }
+    }
   }
   array.sort(function(a,b) 
   {
