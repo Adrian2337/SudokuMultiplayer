@@ -5,6 +5,7 @@ const io = require('socket.io')(server)
 const exec = require('child_process').exec
 
 var visibleFields, jsonBoard
+var socket_id;
 
 app.set('views', './views')
 app.set('view engine', 'ejs')
@@ -13,39 +14,76 @@ app.use(express.urlencoded({ extended: true }))
 
 const rooms = { }
 
+app.get('/sign.ejs', (req, res) => 
+{
+  res.render('sign');
+})
+
 app.get('/', (req, res) => 
 {
   io.emit('update-rooms', rooms);
-  res.render('index', { rooms: rooms })
+  res.render('index', { rooms: rooms, login: null })
+})
+
+app.post('/', (req, res) => 
+{
+  console.log("login: ", req.body.login)
+  console.log("password: ", req.body.password)
+  io.emit('update-rooms', rooms);
+  res.render('index', { rooms: rooms, login: req.body.login})
 })
 
 app.post('/room', (req, res) => 
 {
-  if (rooms[req.body.room] != null) 
+  if (rooms[req.body.room] != null && req.body.room != 'sign.ejs') 
   {
+    console.log("req.params.room: ", req.body.room);
     return res.redirect('/')
   }
-  rooms[req.body.room] = { users: {}, is_game_played: false, sudoku_answer: [] }
-  res.redirect(req.body.room)
-  // Send message that new room was created
-  io.emit('update-rooms', rooms)
+  else if(req.body.room === 'sign.ejs')
+  {
+    console.log("req.params.room: ", req.body.room);
+    console.log("DID nothing there");
+  }
+  else
+  {
+    console.log("req.params.room: ", req.body.room);
+    rooms[req.body.room] = { users: {}, is_game_played: false, sudoku_answer: [] }
+    res.redirect(req.body.room)
+    // Send message that new room was created
+    io.emit('update-rooms', rooms)
+  }
 })
 
 app.get('/:room', (req, res) =>
 {
-  if (rooms[req.params.room] == null)
+  if (rooms[req.params.room] == null && req.params.room !== 'sign.ejs')
   {
     return res.redirect('/')
   }
-  res.render('room', { roomName: req.params.room })
+  else if (req.params.room == 'sign.ejs')
+  {
+    console.log("Got to sign.ejs");
+    for (var a = 0; a < 1; a++)
+    {
+      return res.redirect('/sign.ejs');
+    }
+  }
+  else
+  {
+    res.render('room', { roomName: req.params.room })
+  }
 })
 
 server.listen(8080)
 
 io.on('connection', socket =>
 {
+  socket_id = socket.id;
+  console.log("Socket.id when doing nothing", socket.id);
   socket.on('new-user', (room, name, points, is_playing) =>
   {
+    console.log("socket.id when new-user: ", socket.id);
     socket.join(room)
     rooms[room].users[socket.id] = {name, points, is_playing}
     socket.to(room).broadcast.emit('user-connected', name)

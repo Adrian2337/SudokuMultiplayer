@@ -6,19 +6,38 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script defer src="socket.io/socket.io.js"></script>
   <script defer src="script.js"></script>
+  <style>
+    .center
+    {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
   <title>Sudoku App</title>
 </head>
 <body>
+    <div id="logged-in-checker">
+      <% if(login == null) 
+      { %>
+          <h1 class="center"><a href="./sign.ejs">Sign up/Sign in</a></h1>
+      <% }
+      else
+      { %>
+        <h1 class="center">You're logged in with login:</h1>
+        <h4 class="center" id="login"><%= login %></h1>
+      <% } %>
+    </div>
     <div id="room-container">
         <% Object.keys(rooms).forEach(room => 
         { %>
-          <div><%= room %></div>
-          <a href="/<%= room %>">Join</a>
+          <div class="center"><%= room %></div>
+          <div class="center"><a href="/<%= room %>">Join</a></div>
         <% }) %>
      </div>
       <form action="/room" method="POST">
-        <input name="room" type="text" required>
-        <button type="submit">New Room</button>
+        <div class="center"><input name="room" type="text" required></div>
+        <div class="center"><button type="submit">New Room</button></div>
       </form>
 </body>
 </html>
