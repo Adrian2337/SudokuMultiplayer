@@ -30,9 +30,9 @@ if(minutes != null)
   })
 }
 
-if(messageForm == null)
+if (messageForm == null)
 {
-  var name = prompt('What is your name?')
+  var name = document.getElementById('login').innerHTML;
 }
 else
 {
@@ -78,11 +78,13 @@ socket.on('update-rooms', rooms =>
   {
     var roomElement = document.createElement('div') //tworzymy diva
     roomElement.setAttribute('class', 'room');
+    roomElement.setAttribute('id', 'center');
     roomElement.innerText = list[room];
     var roomLink = document.createElement('a')
     if(roomLink != null)
     {
       roomLink.setAttribute('class', 'link');
+      roomLink.setAttribute('id', 'center');
       roomLink.href = `/${list[room]}`
       roomLink.innerText = 'Join'
     }
