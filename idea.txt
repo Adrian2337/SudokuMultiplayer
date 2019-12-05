@@ -1,7 +1,0 @@
-idea:
-
-wchodzimy do pokoju, mamy room
-
-przesyłamy parametry do serwera i chcemy żeby serwer ustalił wszystkim klientom w roomie czas gry i zwrócił dla wszystkich klientów identyczną tablicę Sudoku
-
-odlicza się czas i jeśli czas dobiegnie końca, to u każdego z klientów wywołuje się metoda submit(), po stronie klienta przetwarzamy ile punktów zdobył w Sudoku, wysyłamy punkty do serwera, serwer sortuje listę punktów i emituje wynik do wszystkich klientów
