@@ -10,6 +10,7 @@ const sudoku_board = document.getElementById('sudoku');
 const button_sudoku = document.getElementById('submit-sudoku');
 const selector = document.getElementById('level');
 
+
 if(button_sudoku != null)
 {
   button_sudoku.addEventListener("click", function()
@@ -17,7 +18,6 @@ if(button_sudoku != null)
     socket.emit('submit-sudoku', roomName, get_sudoku_board_from_client(), socket.id);
   })
 }
-
 if(minutes != null)
 {
   minutes.addEventListener('submit', e => 
@@ -30,8 +30,9 @@ if(minutes != null)
   })
 }
 
-if (messageForm == null)
+if(messageForm == null)
 {
+  //var name = prompt('What is your name?')
   var name = document.getElementById('login').innerHTML;
 }
 else
@@ -78,13 +79,11 @@ socket.on('update-rooms', rooms =>
   {
     var roomElement = document.createElement('div') //tworzymy diva
     roomElement.setAttribute('class', 'room');
-    roomElement.setAttribute('id', 'center');
     roomElement.innerText = list[room];
     var roomLink = document.createElement('a')
     if(roomLink != null)
     {
       roomLink.setAttribute('class', 'link');
-      roomLink.setAttribute('id', 'center');
       roomLink.href = `/${list[room]}`
       roomLink.innerText = 'Join'
     }
@@ -94,23 +93,6 @@ socket.on('update-rooms', rooms =>
       roomContainer.append(roomLink)
     }
   }
-  /* var list = document.getElementsByClassName('room')
-  for (var i = 0; i < list.length; i++) 
-  {
-    console.log(list[i]);
-    if (list[i].innerHTML === room)
-    {
-      roomContainer.remove(list[i]);
-    }
-  }
-  var list_2 = document.getElementsByClassName('link')
-  for (var i = 0; i < list_2.length; i++) 
-  {
-    if (list_2[i].href === `/${room}`)
-    {
-      roomContainer.remove(list_2[i]);
-    }
-  } */
 })
 
 socket.on('chat-message', data => 
