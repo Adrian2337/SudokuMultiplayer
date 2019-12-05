@@ -109,7 +109,7 @@ app.post('/register2', function(request, response) {
 app.get('/index', function(request, response) {
     if (request.session.loggedin) {
         io.emit('update-rooms', rooms);
-        response.render('index', { rooms: rooms, user: request.session.username })
+        response.render('index', { rooms: rooms, login: this.login })
     } else {
         response.send('Please login to view this page!');
     }
@@ -137,7 +137,7 @@ app.get('/:room', (req, res) =>
   {
     return res.redirect('/index')
   }
-  res.render('room', { roomName: req.params.room, user: req.session.username })
+  res.render('room', { roomName: req.params.room, login: this.login })
 })
 
 server.listen(8080)
