@@ -1,89 +1,151 @@
 const express = require('express')
 const app = express()
 const server = require('http').Server(app)
-const io = require('socket.io')(server)
+var io = require("socket.io")(server);
 const exec = require('child_process').exec
 
-var visibleFields, jsonBoard
-var socket_id;
+var visibleFields, jsonBoard;
+var mysql = require('mysql');
+var bodyParser = require('body-parser');
+var session = require('express-session');
 
+// polaczenie z baza danych
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'haslo2234sudoku',
+    database: 'sudokuDB',
+});
+
+connection.connect(function(err) {             
+  if(err) {                                     
+    console.log('error when connecting to db:', err);
+  }  
+  else
+  {
+    console.log("looks like everything is fine");
+  }                                   
+});       
+
+app.use(express.static(__dirname + '/public'));
 app.set('views', './views')
 app.set('view engine', 'ejs')
-app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.json());
+
+app.get('/', (req, res) =>
+{
+    req.session.loggedin = false;
+    res.render('login')
+});
+
+app.get('/login', (req, res) =>
+{
+    req.session.loggedin = false;
+    res.render('login')
+});
+
+app.post('/login', function(request, response) {
+    var username = request.body.username;
+    var password = request.body.password;
+    if (username && password) {
+//        console.log("post received: %s %s", username, password);
+        connection.query('SELECT * FROM users WHERE NAME = ? AND password = ?', [username, password], function (error, results, fields) {
+            if (results.length > 0) 
+            {
+                request.session.loggedin = true;
+                request.session.username = username;
+                //response.redirect('/index');
+                response.render('index', {rooms: rooms, login: username});
+            } else 
+            {
+                response.redirect('/');
+            }
+            response.end();
+        });
+    } else {
+        response.send('Please enter both Username and Password.');
+        response.end();
+    }
+});
+
+app.post('/register1', function(request, response) {
+    request.session.loggedin = false;
+    response.render('register');
+});
+
+app.post('/register2', function(request, response) {
+    var username = request.body.username;
+    var password = request.body.password;
+    if (username && password) {
+        connection.query('INSERT INTO users(name, password) VALUES(?, ?)', [username, password], function(error, results, fields) {
+            if (!error) {
+                console.log("not error");
+                request.session.loggedin = true;
+                request.session.username = username;
+                response.redirect('/login');
+            } else {
+                console.log("error query: ", error.sql);
+                console.log("error code: ", error.code);
+                console.log("error name: ", error.name);
+                console.log("error message: ", error.message);
+                response.redirect('/login');
+            }
+            response.end();
+        });
+    } else {
+        response.send('Please enter both Username and Password.');
+        response.end();
+    }
+});
+
+
+app.get('/index', function(request, response) {
+    if (request.session.loggedin) {
+        io.emit('update-rooms', rooms);
+        response.render('index', { rooms: rooms, user: request.session.username })
+    } else {
+        response.send('Please login to view this page!');
+    }
+    response.end();
+});
+
 
 const rooms = { }
 
-app.get('/sign.ejs', (req, res) => 
-{
-  res.render('sign');
-})
-
-app.get('/', (req, res) => 
-{
-  io.emit('update-rooms', rooms);
-  res.render('index', { rooms: rooms, login: null })
-})
-
-app.post('/', (req, res) => 
-{
-  console.log("login: ", req.body.login)
-  console.log("password: ", req.body.password)
-  io.emit('update-rooms', rooms);
-  res.render('index', { rooms: rooms, login: req.body.login})
-})
-
 app.post('/room', (req, res) => 
 {
-  if (rooms[req.body.room] != null && req.body.room != 'sign.ejs') 
+  if (rooms[req.body.room] != null) 
   {
-    console.log("req.params.room: ", req.body.room);
-    return res.redirect('/')
+    return res.redirect('/index')
   }
-  else if(req.body.room === 'sign.ejs')
-  {
-    console.log("req.params.room: ", req.body.room);
-    console.log("DID nothing there");
-  }
-  else
-  {
-    console.log("req.params.room: ", req.body.room);
-    rooms[req.body.room] = { users: {}, is_game_played: false, sudoku_answer: [] }
-    res.redirect(req.body.room)
-    // Send message that new room was created
-    io.emit('update-rooms', rooms)
-  }
+  rooms[req.body.room] = { users: {}, is_game_played: false, sudoku_answer: [] }
+  res.redirect(req.body.room)
+  // Send message that new room was created
+  io.emit('update-rooms', rooms)
 })
 
 app.get('/:room', (req, res) =>
 {
-  if (rooms[req.params.room] == null && req.params.room !== 'sign.ejs')
+  if (rooms[req.params.room] == null)
   {
-    return res.redirect('/')
+    return res.redirect('/index')
   }
-  else if (req.params.room == 'sign.ejs')
-  {
-    console.log("Got to sign.ejs");
-    for (var a = 0; a < 1; a++)
-    {
-      return res.redirect('/sign.ejs');
-    }
-  }
-  else
-  {
-    res.render('room', { roomName: req.params.room })
-  }
+  res.render('room', { roomName: req.params.room, user: req.session.username })
 })
 
 server.listen(8080)
 
 io.on('connection', socket =>
 {
-  socket_id = socket.id;
-  console.log("Socket.id when doing nothing", socket.id);
   socket.on('new-user', (room, name, points, is_playing) =>
   {
-    console.log("socket.id when new-user: ", socket.id);
     socket.join(room)
     rooms[room].users[socket.id] = {name, points, is_playing}
     socket.to(room).broadcast.emit('user-connected', name)
@@ -257,6 +319,7 @@ function createBoard (callback)
   {
     if (error !== null)
     {
+      console.log(stderr);
       callback(stderr);
     }
     callback(null, stdout);

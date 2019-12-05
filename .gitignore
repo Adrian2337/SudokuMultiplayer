@@ -1,1 +1,12 @@
 node_modules/
+src/generator/BoardCreatorMain.class
+src/generator/BoardGenerator.class
+src/generator/BoardMaker.class
+src/generator/Solver.class
+.idea/SudokuMultiplayer-master.iml
+.idea/workspace.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/encodings.xml
+json_arrays.txt
+idea.txt
