@@ -2,6 +2,7 @@ package generator;
 
 import java.util.ArrayList;
 
+<<<<<<< HEAD
 public class BoardMaker {
      int[][] board;
      int size;
@@ -13,6 +14,27 @@ public class BoardMaker {
             for(int j=0; j<9; j++){
                 boolean succes=false;
                 while(!succes) {
+=======
+/**
+ * Tworzy planszę przy użyciu solvera
+ */
+
+public class BoardMaker {
+
+    int[][] board;
+    int size;
+    ArrayList singleRowBoard;
+
+    public BoardMaker(int size) {
+        board = new int[size][size];
+        singleRowBoard = new ArrayList();
+
+        this.size = size;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                boolean succes = false;
+                while (!succes) {
+>>>>>>> a1a9759... Fix
                     int x = randomInt(9);
 
                     while (!Solver.isSafe(board, i, j, x)) {
@@ -29,6 +51,7 @@ public class BoardMaker {
 
     }
 
+<<<<<<< HEAD
     public static int[][] createBoard(int size){
         BoardMaker maker=new BoardMaker(size);
         return maker.getBoard();
@@ -52,6 +75,35 @@ public class BoardMaker {
                 }
                 else {
                     board[x][y]=tmp;
+=======
+    public static BoardMaker createBoard(int size) {
+        BoardMaker maker = new BoardMaker(size);
+        return maker;
+    }
+
+    private static int randomInt(int range) {
+        double randomDouble = Math.random();
+        randomDouble = randomDouble * range + 1;
+        int randomInt = (int) randomDouble;
+        return randomInt;
+    }
+
+    // n - liczba pól do schowania
+    public int[][] boardHider(int fieldsToHide) {
+
+        while (fieldsToHide > 0) {
+            int x = randomInt(9) - 1;
+            int y = randomInt(9) - 1;
+            int tmp = 0;
+            if (board[x][y] != 0) {
+                tmp = board[x][y];
+                board[x][y] = 0;
+                if (Solver.solveSudokuStarter(board, size) == 1) {
+                    fieldsToHide--;
+
+                } else {
+                    board[x][y] = tmp;
+>>>>>>> a1a9759... Fix
 
                 }
             }
@@ -60,6 +112,7 @@ public class BoardMaker {
         return board;
     }
 
+<<<<<<< HEAD
 
 
     private static int randomInt(int range){
@@ -70,6 +123,8 @@ public class BoardMaker {
     }
 
 
+=======
+>>>>>>> a1a9759... Fix
     public int[][] getBoard() {
         return board;
     }

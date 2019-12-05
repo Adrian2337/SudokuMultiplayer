@@ -340,7 +340,7 @@ function sort_results(associative_array)
 
 function createBoard (callback) 
 {
-  const cmdstring=' java -cp .\\java\\generator\\production\\java\\ generator.BoardCreatorMain '+ visibleFields.toString()
+  const cmdstring=' java -cp .\\src generator.BoardCreatorMain '+ visibleFields.toString()
   exec(cmdstring,function (error, stdout, stderr) 
   {
     if (error !== null)
