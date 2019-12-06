@@ -8,12 +8,15 @@ var visibleFields, jsonBoard;
 var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var async = require('async')
+var crypto = require('crypto');
+var nodemailer = require('nodemailer');
 
 // polaczenie z baza danych
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'haslo2234sudoku',
+    password: 'WPISAC SWOJE HASLO DO ROOTA',
     database: 'sudokuDB',
 });
 
@@ -62,7 +65,7 @@ app.post('/login', function(request, response) {
                 request.session.loggedin = true;
                 request.session.username = username;
                 //response.redirect('/index');
-                response.render('index', {rooms: rooms, login: username});
+                response.render('index', {rooms: rooms, login: username, user: username});
             } else 
             {
                 response.redirect('/');
@@ -80,11 +83,109 @@ app.post('/register1', function(request, response) {
     response.render('register');
 });
 
+app.post('/forgotpassword', function(request, response) {
+    request.session.loggedin = false;
+    response.render('forgotpassword');
+});
+
+app.post('/reset', function(req, res) {
+    async.waterfall([
+        function(done) {
+            crypto.randomBytes(20, function(err, buf) {
+                var token = buf.toString('hex');
+                done(err, token);
+            });
+        },
+        function(token, done) {
+            var email = req.body.email;
+            var username = req.body.username;
+            req.session.email = email;
+
+            if (username && email) {
+                connection.query('SELECT * FROM users WHERE email = ? AND name = ?', [email, username], function (error, results, fields) {
+                    if (results.length <= 0) {
+                        // req.flash('error', 'Account with such email and/or name does not exist.');
+                        return res.redirect('/forgotpassword');
+                    } else {
+                        connection.query('INSERT INTO tokens(token) VALUES(?)', [token], function (error, results, fields) {
+                            if (!error) {
+                                console.log("new token insert");
+                                req.session.token = token;
+                                var smtpTransport = nodemailer.createTransport({
+                                    service: 'Gmail',
+                                    auth: {
+                                        user: 'TU WPISAC SWOJ EMAIL',
+                                        pass: 'TU WPISAC HASLO DO MAILA'
+                                    }
+                                });
+
+                                console.log(req.body.mail);
+                                var mailOptions = {
+                                    to: email,
+                                    from: 'WPISAC SWOJ EMAIL',
+                                    subject: 'Sudoku Password Reset',
+                                    text: 'Reset your password using this link:\n\n' + 'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+                                        'If you did not request a password reset, please ignore this message.'
+                                };
+
+                                smtpTransport.sendMail(mailOptions, function (err) {
+                                    console.log('mail');
+                                    done(err, 'done');
+                                });
+                                res.render('checkemail');
+                            } else {
+                                console.log("error query: ", error.sql);
+                                console.log("error code: ", error.code);
+                                console.log("error name: ", error.name);
+                                console.log("error message: ", error.message);
+                                res.redirect('/login');
+                            }
+                        })
+                    }
+                });
+            }
+        }])
+});
+app.get('/reset/:token', function(req, res) {
+    if(req.session.token === req.params.token) {
+        res.render('resetpassword', {token: req.params.token});
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.post('/reset/:token', function(req, res) {
+    var newpassword = req.body.newpassword;
+    var email = req.session.email;
+
+    console.log(newpassword);
+    console.log(email);
+
+    if (newpassword) {
+        connection.query('UPDATE users SET password = ? WHERE email = ?', [newpassword, email], function (error, results, fields) {
+            if (error)
+            {
+                console.log('password not changed');
+                res.redirect('/index');
+            } else
+            {
+                req.session.token = null;
+                res.redirect('/login');
+            }
+            res.end();
+        });
+    } else {
+        res.send('Please enter new password.');
+        res.end();
+    }
+});
+
 app.post('/register2', function(request, response) {
+    var email = request.body.email;
     var username = request.body.username;
     var password = request.body.password;
     if (username && password) {
-        connection.query('INSERT INTO users(name, password) VALUES(?, ?)', [username, password], function(error, results, fields) {
+        connection.query('INSERT INTO users(email, name, password) VALUES(?, ?, ?)', [email, username, password], function(error, results, fields) {
             if (!error) {
                 console.log("not error");
                 request.session.loggedin = true;
@@ -140,7 +241,7 @@ app.get('/:room', (req, res) =>
   res.render('room', { roomName: req.params.room, user: req.session.username })
 })
 
-server.listen(8080)
+server.listen(3036)
 
 io.on('connection', socket =>
 {
