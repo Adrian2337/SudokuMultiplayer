@@ -9,6 +9,7 @@ const timeLeft = document.getElementById('seconds');
 const sudoku_board = document.getElementById('sudoku');
 const button_sudoku = document.getElementById('submit-sudoku');
 const selector = document.getElementById('level');
+const gamemode = document.getElementById('gamemode');
 
 
 if(button_sudoku != null)
@@ -25,7 +26,8 @@ if(minutes != null)
       e.preventDefault();
       const minutes = minutesInput.value;
       const value = selector[selector.selectedIndex].value;
-      socket.emit('start-game', roomName, minutes, socket.id, value)
+      const value_2 = gamemode[gamemode.selectedIndex].value;
+      socket.emit('start-game', roomName, minutes, socket.id, value, value_2)
       minutesInput.value = ''
   })
 }
@@ -38,15 +40,15 @@ if(messageForm == null)
 else
 {
   var has_submitted = false;
-  socket.emit('new-user', roomName, name, 0, false)
-  appendMessage(`You joined with name: ${bold_name(name)}`)
+  socket.emit('new-user', roomName, name, 0, false, false)
+  appendMessage(`You joined with name: ${bold_name(name)}`, "HTML")
   //ten listener powoduje ze wysylamy wiadomosc i ja emitujemy do innych
   messageForm.addEventListener('submit', e => 
   {
     console.log("I got to messageForm as well")
     e.preventDefault(); //dzieki tej funkcji nie rozlaczamy sie i nie laczymy sie ponownie (nie ma odswiezania strony) gdy cos wysylamy!!!
     const message = messageInput.value
-    appendMessage(`${bold_name("You")}: ${message}`)
+    appendMessage(`${bold_name("You")}: ${message}`, "HTML")
     socket.emit('send-chat-message', roomName, message)
     messageInput.value = ''
   }) 
@@ -97,12 +99,12 @@ socket.on('update-rooms', rooms =>
 
 socket.on('chat-message', data => 
 {
-  appendMessage(`${bold_name(data.name)}: ${data.message}`)
+  appendMessage(`${bold_name(data.name)}: ${data.message}`, "HTML")
 })
 
 socket.on('send-minutes-message', data => 
 {
-  appendMessage(`Someone set ${data.minutes} minutes to play. Game starts`)
+  appendMessage(`Someone set ${data.minutes} minutes to play. Game starts`, "HTML")
   for (var a = 0; a < data.sudoku.length; a++)
   {
     for (var b = 0; b < data.sudoku[a].length; b++)
@@ -127,18 +129,27 @@ socket.on('send-minutes-message', data =>
   }
 })
 
-socket.on('game-has-ended', check => {
-  appendMessage(check);
+socket.on('game-has-ended', check => 
+{
+  var string = "Results: \n";
+  for (var a = 0; a < check.length; a++)
+  {
+    string += check[a][0];
+    string += ", ";
+    string += check[a][1];
+    string += "\n";
+  }
+  appendMessage(string, "TEXT");
 });
 
 socket.on('user-connected', name => 
 {
-  appendMessage(`${bold_name(name)} connected`)
+  appendMessage(`${bold_name(name)} connected`, "HTML")
 })
 
 socket.on('user-disconnected', name => 
 {
-  appendMessage(`${bold_name(name)} disconnected`)
+  appendMessage(`${bold_name(name)} disconnected`, "HTML")
 })
 
 socket.on('timer', function(data) 
@@ -146,30 +157,21 @@ socket.on('timer', function(data)
   timeLeft.value = data.countdown;
   if(timeLeft.value < 1)
   {
-    appendMessage(`Time's up!`) //sending checking and so on 
+    appendMessage(`Time's up!`, "HTML") //sending checking and so on 
     socket.emit('submit-sudoku', roomName, get_sudoku_board_from_client(), socket.id)
   }
 });
 
 socket.on('first-message', (name) =>
 {
-  appendMessage(`${name} has submitted sudoku.`)
+  appendMessage(`${name} has submitted sudoku.`, "HTML")
 })
 
-socket.on('second-message', points =>
-{
-  appendMessage(`You've scored ${points} points`);
-});
-
-socket.on('third-message', () =>
-{
-  appendMessage("You've already submitted your sudoku");
-})
-
-function appendMessage(message) 
+function appendMessage(message, string) 
 {
   const messageElement = document.createElement('div')
-  messageElement.innerHTML = message
+  if(string == "HTML") messageElement.innerHTML = message
+  else if(string == "TEXT") messageElement.innerText = message
   messageContainer.append(messageElement)
 }
 
@@ -194,7 +196,7 @@ function get_sudoku_board_from_client()
       for(var b = 0; b < 9; b++)
       {
         const x = sudoku_board.children.namedItem(`${a}`).children.namedItem(`${b}`).firstChild;
-        array[a][b] = parseInt(x.value);
+        array[a][b] = x.value;
       }
    }
    return array;

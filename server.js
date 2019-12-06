@@ -144,10 +144,10 @@ server.listen(8080)
 
 io.on('connection', socket =>
 {
-  socket.on('new-user', (room, name, points, is_playing) =>
+  socket.on('new-user', (room, name, points, is_playing, is_eliminated) =>
   {
     socket.join(room)
-    rooms[room].users[socket.id] = {name, points, is_playing}
+    rooms[room].users[socket.id] = {name, points, is_playing, is_eliminated}
     socket.to(room).broadcast.emit('user-connected', name)
     console.log(`new user ${rooms[room].users[socket.id].name} with socket.id: `, socket.id);
   })
@@ -165,12 +165,14 @@ io.on('connection', socket =>
         var check = sort_results(rooms[room].users);
         if(check !== null)
         {
+           var last_place_id = check[check.length-1][2];
+           rooms[room].users[last_place_id].is_eliminated = true;
            io.in(room).emit('game-has-ended', check);
            rooms[room].is_game_played = false;
         }
      }
   })
-  socket.on('start-game', (room, minutes, id, difficulty) =>
+  socket.on('start-game', (room, minutes, id, difficulty, gamemode) =>
   {
     if(difficulty == 4)
     {
@@ -183,38 +185,11 @@ io.on('connection', socket =>
 
     if(rooms[room].is_game_played == false)
     {
-        createBoard(function (err, out) {
-            jsonBoard=out
-            /**
-             * exec jest asynchroniczny
-             * wszystko co potrzebuje planszy musi wystartować stąd
-             */
-      const sudoku = generate_new_game(Math.floor(Math.random()*10));
-      // const sudoku = generate_new_game_2(40);
-      io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
-      
-      rooms[room].is_game_played = true;
-      rooms[room].sudoku_answer = sudoku.solver;
-      for(user in rooms[room].users)
-      {
-          rooms[room].users[user].points = 0;
-          rooms[room].users[user].has_submitted = false;
-          console.log(rooms[room]);
-      }
-      var countdown = 30;
-      const time = setInterval( function() 
-      {
-        countdown--;
-        io.in(room).emit('timer', { countdown: countdown});
-        if (countdown < 1) 
+        var no_rounds = Object.keys(rooms[room].users).length - 1;
+        start_new_game(room, minutes, socket, gamemode, no_rounds, true);
+        /* createBoard(function (err, out) 
         {
-          clearInterval(time);
-          if(rooms[room] != null)
-          {
-            rooms[room].is_game_played = false;
-          }
-        }
-      }, 1000);
+            jsonBoard=out //exec asynchroniczny, wszystko co potrzebuje planszy musi wystartowac stad
             const sudoku=JSON.parse(jsonBoard)
             io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
       
@@ -238,13 +213,12 @@ io.on('connection', socket =>
                       clearInterval(time);
                       if(rooms[room] != null)
                       {
-                      rooms[room].is_game_played = false;
+                        rooms[room].is_game_played = false;
                       }
                   }
                 }
               }, 1000);
-        });
-
+        }); */
     }
   })
   socket.on('disconnect', () =>
@@ -282,7 +256,6 @@ function getUserRooms(socket)
 
 function preprocess_sudoku(client_array, solver_array)
 {
-    console.log(client_array);
     var correct_fields = 0;
     var void_fields = 0;
     var incorrect_fields = 0;
@@ -290,17 +263,16 @@ function preprocess_sudoku(client_array, solver_array)
     {
         for(var b = 0; b < client_array.length; b++)
         {
-            if(client_array[a][b] === solver_array[a][b])
+            var c = parseInt(client_array[a][b]);
+            if(!isNaN(c))
             {
-                correct_fields++;
+              if(c === solver_array[a][b]) correct_fields++;
+              else incorrect_fields++;
             }
-            else if(client_array[a][b] === null)
+            else
             {
-                void_fields++;
-            }
-            else if(client_array[a][b] !== solver_array[a][b])
-            {
-                incorrect_fields++;
+              if(client_array[a][b] === '') void_fields++;
+              else incorrect_fields++;
             }
         }
     }
@@ -324,7 +296,7 @@ function sort_results(associative_array)
     }
     if(associative_array[user].has_submitted === true)
     {
-      array.push([associative_array[user].name, associative_array[user].points-visibleFields]);
+      array.push([associative_array[user].name, associative_array[user].points-visibleFields, user]);
       if(associative_array[user].is_playing === true)
       {
         associative_array[user].is_playing = false;
@@ -338,7 +310,7 @@ function sort_results(associative_array)
   return array;
 }
 
-function createBoard (callback) 
+function createBoard(callback) 
 {
   const cmdstring=' java -cp .\\src generator.BoardCreatorMain '+ visibleFields.toString()
   exec(cmdstring,function (error, stdout, stderr) 
@@ -351,4 +323,52 @@ function createBoard (callback)
     callback(null, stdout);
     return stdout;
   })
+}
+
+function start_new_game(room, minutes, socket, gamemode, no_rounds, is_first_round)
+{
+  createBoard(function (err, out) 
+  {
+      jsonBoard=out //exec asynchroniczny, wszystko co potrzebuje planszy musi wystartowac stad
+      const sudoku=JSON.parse(jsonBoard)
+      io.in(room).emit('send-minutes-message', { minutes: minutes, name: rooms[room].users[socket.id].name, boolean: rooms[room].is_game_played, sudoku: sudoku.start_sudoku});
+
+      rooms[room].is_game_played = true;
+      rooms[room].sudoku_answer = sudoku.solver;
+      for(user in rooms[room].users)
+      {
+          rooms[room].users[user].points = 0;
+          rooms[room].users[user].has_submitted = false;
+          if(gamemode === 5 || is_first_round)
+          {
+            rooms[room].users[user].is_eliminated = false;
+          }
+          if(rooms[room].users[user].is_eliminated === false)
+          {
+              rooms[room].users[user].is_playing = true;
+          }
+      }
+      var countdown = 60*minutes;
+      const time = setInterval( function() 
+      {
+          countdown--;
+          io.in(room).emit('timer', { countdown: countdown});
+          if(rooms[room] != null)
+          {
+            if (countdown < 1 || rooms[room].is_game_played === false) 
+            {
+                clearInterval(time);
+                if(rooms[room] != null)
+                {
+                  rooms[room].is_game_played = false;
+                  no_rounds--;
+                  if(gamemode == 6 && no_rounds > 0)
+                  {
+                    start_new_game(room, minutes, socket, gamemode, no_rounds, false);
+                  }
+                }
+            }
+          }
+        }, 1000);
+  });
 }
