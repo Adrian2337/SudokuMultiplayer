@@ -1,0 +1,21 @@
+CREATE DATABASE IF NOT EXISTS sudokuDB;
+
+USE sudokuDB;
+
+CREATE TABLE users (
+	email VARCHAR(52) NOT NULL,
+	name VARCHAR(52) NOT NULL,
+	password VARCHAR(52) NOT NULL,
+	wins INT DEFAULT 0,
+	activated INT DEFAULT 1,
+
+	PRIMARY KEY (email),
+	UNIQUE (name)
+);
+
+CREATE TABLE tokens (
+	token VARCHAR(52) NOT NULL,
+	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	
+	PRIMARY KEY(token)
+);
