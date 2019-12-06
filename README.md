@@ -17,6 +17,9 @@ That app also requires having Node.js and npm installed. If you need to install 
 Inside terminal, run: 
 ##### mysql -u your_name -p
 
+To load the sql file into mysql enter this command:
+##### mysql -u your_name -p < sudokuDB.sql (RECCOMENDED: use whole path)
+
 Then write your password and run the script from db.sql file. Inside server.js code, in line 13, set your connection as following:
 
 ##### var connection = mysql.createConnection({
