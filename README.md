@@ -20,7 +20,7 @@ Inside terminal, run:
 `mysql -u your_name -p`
 
 To load the sql file into mysql enter this command:
-`mysql -u your_name -p < sudokuDB.sql` (RECCOMENDED: use whole path) 
+`mysql -u your_name -p < sudokuDB.sql` (RECOMMENDED: use whole path) 
 
 Then write your password and run the script from db.sql file. Inside server.js code, in line 13, set your connection as following:
 
