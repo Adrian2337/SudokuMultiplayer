@@ -75,6 +75,92 @@ app.post('/login', function(request, response) {
     }
 });
 
+app.post('/activate', function(request, response) {
+    async.waterfall([
+        function(done) {
+            crypto.randomBytes(20, function(err, buf) {
+                var token = buf.toString('hex');
+                done(err, token);
+            });
+        },
+        function(token, done) {
+            var email = request.body.email;
+            var username = request.session.username;
+            request.session.email = email;
+
+            if (username && email) {
+                connection.query('SELECT * FROM users WHERE email = ? AND name = ?', [email, username], function (error, results, fields) {
+                    if (results.length <= 0) {
+                        // no such account
+                        return response.redirect('/activate');
+                    } else {
+                        connection.query('INSERT INTO tokens(token) VALUES(?)', [token], function (error, results, fields) {
+                            if (!error) {
+                                // session token set to validate token accessed from external link (email)
+                                request.session.token = token;
+                                var smtpTransport = nodemailer.createTransport({
+                                    service: 'Gmail',
+                                    auth: 
+                                    {
+                                        user: 'your_gmail_mail',
+                                        pass: 'your_password'
+                                    },
+                                    tls:
+                                    {
+                                      rejectUnauthorized: false
+                                    }
+                                });
+                                var mailOptions = {
+                                    to: email,
+                                    from: 'Sudoku Multiplayer',
+                                    subject: 'Sudoku Account Activation',
+                                    text: 'Activate your account using this link:\n\n' + 'http://' + request.headers.host + '/activate/' + token + '\n\n'
+                                };
+
+                                smtpTransport.sendMail(mailOptions, function (err) 
+                                {
+                                    done(err, 'done');
+                                });
+                                response.render('checkemail');
+                            } else 
+                            {
+                                response.redirect('/login');
+                            }
+                        })
+                    }
+                });
+            }
+        }])
+});
+
+app.get('/activate/:token', function(request, response) {
+    if(request.session.token === request.params.token) {
+
+        connection.query('UPDATE users SET activated = 1 WHERE name = ?', [request.session.username], function(error, results){
+            if(!error){
+                response.render('activateconfirmation', {token: request.params.token, user: request.session.username});
+            } else {
+                response.send('Could not activate your account. Contact consumer support for more details ' +
+                    'at sudoku.support@fakemail.com');
+            }
+
+        });
+
+
+    } else {
+        response.render('login');
+    }
+});
+
+app.post('/confirm', function(request, response) {
+    request.session.username = null;
+    request.session.email = null;
+
+    response.redirect('login');
+});
+
+
+
 app.post('/register1', function(request, response) {
     request.session.loggedin = false;
     response.render('register');
