@@ -1,26 +1,32 @@
-To run Sudoku, need to: 
+<h1 align="center">Sudoku Multiplayer</h1>
+
+### Prerequisites
+
+You need to download and install:
+- Java Development Kit (tested on versions <a href="https://www.oracle.com/java/technologies/javase-downloads.html#JDK8">8</a> and <a href="https://www.oracle.com/java/technologies/javase-jdk15-downloads.html">15</a>)
+- MySQL (Windows installer: <a href="https://dev.mysql.com/downloads/installer/">here</a>)
+- <a href="https://nodejs.org/en/download/">Node.js & npm</a>
+
+### How to run Sudoku?
 
 1. Compile Java Classes
 
-Inside folder src/generator, run the terminal, then run command: `javac *.java`. Tested and worked on Java 15.
+From main project folder, run: ```cd src/generator && javac *.java```.
 
-2. Have Node.js and npm installed
+2. Install necessary npm dependencies
 
-That app also requires having Node.js & npm installed. After installing npm, inside main project folder, run this command:
+Inside main project folder, run this command:
 
 ```
 npm i socket.io express express-session nodemon mysql ejs
 ```
 
-3. Have MySQL installed
+3. Configure database
 
-Inside terminal, run: 
-`mysql -u your_name -p`
+From main project folder, run: (-p requires password) 
+`mysql -u your_name -p < db.sql`
 
-To load the sql file into mysql enter this command:
-`mysql -u your_name -p < db.sql` (RECOMMENDED: use whole path) 
-
-Then write your password and run the script from db.sql file. Inside server.js code, in line 13, set your connection as following:
+Inside server.js code, in line 13, set your connection as following:
 
 ``` var connection = mysql.createConnection({
 host: 'localhost',
@@ -29,7 +35,7 @@ password: 'your_password',
 database: 'sudokuDB',
  }); 
  ```
- 
+
  Tested and worked on MySQL 8.0.21.
 
 4. Run the script inside your terminal: 
